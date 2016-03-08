@@ -5,7 +5,9 @@
     <artifactId>BorkLibs</artifactId>
     <version>1</version>
     <packaging>pom</packaging>
-    <modules></modules>
+    <modules>
+        <module>Executor</module>
+    </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
