@@ -23,6 +23,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -36,6 +37,9 @@ public abstract class Executor implements CommandExecutor {
 
     private final @NonNull String prefix;
     private final List<CommandData> commandMap = Lists.newArrayList();
+    
+    @Setter
+    private boolean printErrors = false;
     
     public final void addListener(CommandListener listener) {
         Class<?> clazz = listener.getClass();
@@ -54,7 +58,7 @@ public abstract class Executor implements CommandExecutor {
     
     private final CommandData getDataForName(String name) {
         for (CommandData data : commandMap) {
-            if (data.getLongName().equalsIgnoreCase(name) || data.getAlias().equalsIgnoreCase(name)) {
+            if (data.getLongName().equalsIgnoreCase(name) || data.isAlias(name)) {
                 return data;
             }
         }
@@ -81,7 +85,7 @@ public abstract class Executor implements CommandExecutor {
                 }
                 
                 return true;
-            } catch (Exception e) { }
+            } catch (Exception e) { if (printErrors) e.printStackTrace(); }
             List<CommandData> commands = Lists.newArrayList();
             
             sendMessage(sender, ChatColor.GOLD + "Available Commands:");
@@ -110,6 +114,7 @@ public abstract class Executor implements CommandExecutor {
                             method.invoke(data.getListener(), handler);
                         } catch (Throwable t) {
                             sendMessage(sender, ChatColor.RED + "Error: " + t.getMessage());
+                            if (printErrors) t.printStackTrace();
                         }
                     } else {
                         sendMessage(sender, ChatColor.RED + "Error: Not enough arguments. Use /" + command.getName() + " for help");
@@ -134,9 +139,20 @@ public abstract class Executor implements CommandExecutor {
     @Data
     private static final class CommandData {
         private final @NonNull String longName;
-        private final @NonNull String alias;
+        private final @NonNull String[] alias;
         private final @NonNull Method method;
         private final @NonNull CommandListener listener;
+        
+        private boolean isAlias(String str) {
+            if (alias.length == 1) return alias[0].equalsIgnoreCase(str);
+            
+            boolean is = false;
+            for (String a : alias) {                
+                if (is = a.equalsIgnoreCase(str)) break;
+            }
+            
+            return is;
+        }
         
         @Override
         public int hashCode() {
