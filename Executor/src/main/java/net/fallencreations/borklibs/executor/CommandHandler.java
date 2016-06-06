@@ -80,5 +80,18 @@ public class CommandHandler {
         message = p + " " + message;
         
         getCommandSender().sendMessage(ChatColor.translateAlternateColorCodes('&', String.format(message, info)));
-    } 
+    }
+    
+    public void reply(String message, String[]... replacements) {
+        String p = prefix == null ? "" : prefix;
+        message = p + " " + message;
+        
+        for (String[] replacement : replacements) {
+            if (replacement.length != 2) continue;
+            
+            message = message.replace(replacement[0], replacement[1]);
+        }
+        
+        getCommandSender().sendMessage(ChatColor.translateAlternateColorCodes('&', message));
+    }
 }
